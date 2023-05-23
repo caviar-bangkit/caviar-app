@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">Caviar</string>
+    <string name="app_name">Caviar Apps</string>
     <string name="selamat_datang">Selamat Datang</string>
     <string name="content_login_1">Dapatkan pengalaman untuk bernavigasi menuju lampu lalu lintas dengan mudah dan fitur penyeberangan yang membantu</string>
     <string name="tombol_login">Tombol Login</string>
     <string name="content_login_2">Silahkan masuk melalui tombol dibawah ini</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="tombol_logout">tombol_logout</string>
 </resources>

@@ -34,6 +34,10 @@ class DetectionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityDetectionBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
+        supportActionBar?.hide()
+        activityMainBinding.closeButton.setOnClickListener {
+            finish()
+        }
     }
 
     override fun onBackPressed() {

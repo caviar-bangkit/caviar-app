@@ -108,6 +108,8 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             setUpCamera()
         }
 
+
+        fragmentCameraBinding
         // Attach listeners to UI control widgets
         initObjectDetection()
     }
@@ -117,11 +119,11 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         objectDetectorHelper.maxResults = 5
         objectDetectorHelper.numThreads = 3
         objectDetectorHelper.currentDelegate = ObjectDetectorHelper.DELEGATE_CPU
-        objectDetectorHelper.currentModel = ObjectDetectorHelper.MODEL_EFFICIENTDETV0
+        objectDetectorHelper.currentModel = ObjectDetectorHelper.MODEL_DETEKSI_LAMPU_2
         updateControlsUi()
     }
 
-    // Update the values displayed in the bottom sheet. Reset detector.
+
     private fun updateControlsUi() {
 
         // Needs to be cleared instead of reinitialized because the GPU

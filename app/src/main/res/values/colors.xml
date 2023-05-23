@@ -8,10 +8,16 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="crossing_primary">#8BC34A</color>
+    <color name="crossing_primary_variant">#689F38</color>
+    <color name="crossing_on_primary">#FFFFFF</color>
+
+    <color name="crossing_secondary">#FF5722</color>
+    <color name="crossing_secondary_variant">#E64A19</color>
+    <color name="crossing_on_secondary">#000000</color>
+
     <color name="bounding_box_color">#FF6F00</color>
     <color name="toolbar_background">#EEEEEE</color>
-    <color name="bottom_sheet_background">#EEEEEE</color>
-    <color name="bottom_sheet_text_color">@android:color/black</color>
     <color name="icActive">#FFFFFFFF</color>
     <color name="icFocused">#DDFFFFFF</color>
     <color name="icPressed">#AAFFFFFF</color>

@@ -5,12 +5,18 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
+import com.bangkit.caviar.Location
+import com.bangkit.caviar.NetworkConfig
 import com.bangkit.caviar.R
 import com.bangkit.caviar.databinding.ActivityMainBinding
 import com.bangkit.caviar.ui.login.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +34,31 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
+
+//        getNearestTrafficLight()
+
+    }
+
+
+    fun getNearestTrafficLight(lat:Double, long:Double, radius:Double){
+        NetworkConfig().getService().getNearestCrossing(lat,long,radius).enqueue(
+            object : Callback<Location> {
+                override fun onResponse(
+                    call: Call<Location>,
+                    response: Response<Location>
+                ) {
+                    if (response.isSuccessful) {
+                        val data:Location? = response.body()
+                        if (data != null) {
+
+                        }
+                    }
+                }
+                override fun onFailure(call: Call<Location>, t: Throwable) {
+                    Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Caviar</string>
+    <string name="selamat_datang">Selamat Datang</string>
+    <string name="content_login_1">Dapatkan pengalaman untuk bernavigasi menuju lampu lalu lintas dengan mudah dan fitur penyeberangan yang membantu</string>
 </resources>

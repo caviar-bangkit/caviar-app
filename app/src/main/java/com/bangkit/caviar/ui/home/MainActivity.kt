@@ -10,6 +10,7 @@ import com.bangkit.caviar.Location
 import com.bangkit.caviar.NetworkConfig
 import com.bangkit.caviar.R
 import com.bangkit.caviar.databinding.ActivityMainBinding
+import com.bangkit.caviar.model.NearbyTrafficLightResponse
 import com.bangkit.caviar.ui.login.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -42,19 +43,19 @@ class MainActivity : AppCompatActivity() {
 
     fun getNearestTrafficLight(lat:Double, long:Double, radius:Double){
         NetworkConfig().getService().getNearestCrossing(lat,long,radius).enqueue(
-            object : Callback<Location> {
+            object : Callback<NearbyTrafficLightResponse> {
                 override fun onResponse(
-                    call: Call<Location>,
-                    response: Response<Location>
+                    call: Call<NearbyTrafficLightResponse>,
+                    response: Response<NearbyTrafficLightResponse>
                 ) {
                     if (response.isSuccessful) {
-                        val data:Location? = response.body()
+                        val data:NearbyTrafficLightResponse? = response.body()
                         if (data != null) {
 
                         }
                     }
                 }
-                override fun onFailure(call: Call<Location>, t: Throwable) {
+                override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
                     Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
                 }
             }

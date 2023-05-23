@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "122670404265",
+    "project_id": "caviar-apps-da02b",
+    "storage_bucket": "caviar-apps-da02b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:122670404265:android:99f99a49f7aff025e4cfb8",
+        "android_client_info": {
+          "package_name": "com.bangkit.caviar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "122670404265-8q0lt0rrhqjncstmuif2b118d1ihuhjp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bangkit.caviar",
+            "certificate_hash": "6485e670e1c422d052b28257f68805d39d44ebb3"
+          }
+        },
+        {
+          "client_id": "122670404265-e92g5nsa8k0r0sotmn9k8rt788ovte09.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi8NVqm3Zv-h1OGqgux-vqAeSzVaycYu0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "122670404265-e92g5nsa8k0r0sotmn9k8rt788ovte09.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

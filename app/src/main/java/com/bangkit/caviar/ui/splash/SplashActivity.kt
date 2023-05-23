@@ -5,8 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import com.bangkit.caviar.MainActivity
 import com.bangkit.caviar.R
+import com.bangkit.caviar.ui.login.LoginActivity
 
 class SplashActivity : AppCompatActivity() {
 
@@ -19,7 +19,7 @@ class SplashActivity : AppCompatActivity() {
 
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }, SPLASH_DELAY_MS)
     }

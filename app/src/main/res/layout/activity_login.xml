@@ -42,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
         android:fontFamily="sans-serif-condensed"
-        android:text="Silahkan masuk melalui tombol dibawah ini"
+        android:text="@string/content_login_2"
         android:textColor="#272626"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -53,6 +53,7 @@
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/signInButton"
+        android:contentDescription="@string/tombol_login"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="108dp"

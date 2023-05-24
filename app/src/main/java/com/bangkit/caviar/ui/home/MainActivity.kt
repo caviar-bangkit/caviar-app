@@ -21,6 +21,7 @@ import android.speech.tts.TextToSpeech
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bangkit.caviar.ui.detection.DetectionActivity
 import com.google.android.gms.location.*
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -249,6 +250,7 @@ class MainActivity : AppCompatActivity() {
     )
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
+    private var destinationValue = Point.fromLngLat(107.1359, -6.8272)
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -366,7 +368,12 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccessful) {
                         val data: NearbyTrafficLightResponse? = response.body()
                         if (data != null) {
-
+                            // Mengupdate nilai destinationValue berdasarkan data yang diterima
+//                            val nearestTrafficLight = data.getNearestTrafficLight()
+//                            if (nearestTrafficLight != null) {
+//                                val destination = Point.fromLngLat(nearestTrafficLight.longitude, nearestTrafficLight.latitude)
+//                                destinationValue = destination
+//                            }
                         }
                     }
                 }
@@ -421,8 +428,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.btnSearchTraffic.setOnClickListener {
-            val destination = Point.fromLngLat(107.1359, -6.8272)
+            val destination = destinationValue
             findRoute(destination)
+        }
+
+        binding.btnFabCamera.setOnClickListener {
+            startActivity(Intent(this, DetectionActivity::class.java))
+            finish()
         }
 
         binding.stop.setOnClickListener {
@@ -447,6 +459,7 @@ class MainActivity : AppCompatActivity() {
         MapboxNavigationApp.setup(
             NavigationOptions.Builder(this)
                 .accessToken(getString(R.string.mapbox_access_token))
+                    //fungsi simulasi navigasi
 //                .locationEngine(replayLocationEngine)
                 .build()
         )
@@ -578,6 +591,7 @@ class MainActivity : AppCompatActivity() {
         binding.routeOverview.visibility = View.VISIBLE
         binding.tripProgressCard.visibility = View.VISIBLE
         binding.btnSearchTraffic.visibility = View.INVISIBLE
+        binding.btnFabCamera.visibility = View.INVISIBLE
 
         navigationCamera.requestNavigationCameraToOverview()
     }
@@ -589,6 +603,7 @@ class MainActivity : AppCompatActivity() {
         binding.routeOverview.visibility = View.INVISIBLE
         binding.tripProgressCard.visibility = View.INVISIBLE
         binding.btnSearchTraffic.visibility = View.VISIBLE
+        binding.btnFabCamera.visibility = View.VISIBLE
     }
 
     override fun onDestroy() {

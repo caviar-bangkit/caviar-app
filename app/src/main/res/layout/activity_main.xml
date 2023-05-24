@@ -7,17 +7,31 @@
     android:padding="8dp"
     tools:context=".ui.home.MainActivity">
 
-    <Button
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_fab_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:clickable="true"
+        android:contentDescription="@string/content_description_camera"
+        app:layout_constraintBottom_toTopOf="@+id/tripProgressCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/soundButton"
+        app:srcCompat="@drawable/ic_camera"
+        android:focusable="true" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_search_traffic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cari Lampu lalu lintas"
-        app:cornerRadius="20dp"
+        android:layout_marginStart="16dp"
+        android:clickable="true"
+        android:contentDescription="@string/content_description_traffic"
         app:layout_constraintBottom_toTopOf="@+id/tripProgressCard"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:elevation="10dp"/>
-
+        android:src="@drawable/ic_traffic"
+        android:focusable="true" />
 
     <com.mapbox.maps.MapView
         android:id="@+id/mapView"
@@ -26,7 +40,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" >
+
+
+    </com.mapbox.maps.MapView>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/tripProgressCard"

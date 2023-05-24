@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
-import com.bangkit.caviar.Location
 import com.bangkit.caviar.NetworkConfig
 import com.bangkit.caviar.R
 import com.bangkit.caviar.databinding.ActivityMainBinding
@@ -251,7 +250,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
     private var destinationValue = Point.fromLngLat(107.1359, -6.8272)
-
+    private lateinit var originValue: Point
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -355,10 +354,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
         setupUI()
-//        getNearestTrafficLight()
+
     }
 
-    fun getNearestTrafficLight(lat: Double, long: Double, radius: Double) {
+    fun getNearestTrafficLight() {
+        if(!::originValue.isInitialized) {
+           return
+        }
+        val radius = 1000.0
+        val lat = originValue.latitude()
+        val long = originValue.longitude()
         NetworkConfig().getService().getNearestCrossing(lat, long, radius).enqueue(
             object : Callback<NearbyTrafficLightResponse> {
                 override fun onResponse(
@@ -369,11 +374,12 @@ class MainActivity : AppCompatActivity() {
                         val data: NearbyTrafficLightResponse? = response.body()
                         if (data != null) {
                             // Mengupdate nilai destinationValue berdasarkan data yang diterima
-//                            val nearestTrafficLight = data.getNearestTrafficLight()
-//                            if (nearestTrafficLight != null) {
-//                                val destination = Point.fromLngLat(nearestTrafficLight.longitude, nearestTrafficLight.latitude)
-//                                destinationValue = destination
-//                            }
+                            val nearestTrafficLight = data.data
+                            if (nearestTrafficLight != null) {
+                                val destination = Point.fromLngLat(nearestTrafficLight.longitude, nearestTrafficLight.latitude)
+                                destinationValue = destination
+                                findRoute(destination)
+                            }
                         }
                     }
                 }
@@ -428,8 +434,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.btnSearchTraffic.setOnClickListener {
-            val destination = destinationValue
-            findRoute(destination)
+            getNearestTrafficLight()
+
         }
 
         binding.btnFabCamera.setOnClickListener {
@@ -500,6 +506,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     )
                 )
+                originValue =Point.fromLngLat(location.longitude, location.latitude)
                 mapboxReplayer.playFirstLocation()
                 mapboxReplayer.playbackSpeed(3.0)
             } else {

@@ -51,10 +51,24 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation "androidx.cardview:cardview:1.0.0"
 
+    // Firebase
     implementation 'com.google.firebase:firebase-auth-ktx:21.0.3'
     implementation 'com.google.android.gms:play-services-auth:20.1.0'
 
+    // Maps and Navigation
+    implementation 'com.mapbox.maps:android:10.12.2'
+    implementation "com.mapbox.navigation:android:2.10.1"
+    implementation "com.mapbox.navigation:ui-dropin:2.10.1"
+    implementation "com.google.android.gms:play-services-location:20.0.0"
+
+    // Lifecycle
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.21"
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 
     // Navigation library
     def nav_version = "2.3.5"

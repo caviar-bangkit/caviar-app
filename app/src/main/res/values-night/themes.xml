@@ -8,7 +8,7 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/crossing_secondary</item>
         <item name="colorSecondaryVariant">@color/crossing_secondary</item>
-        <item name="colorOnSecondary">@color/crossing_on_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->

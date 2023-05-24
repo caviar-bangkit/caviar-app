@@ -61,6 +61,7 @@ dependencies {
     implementation 'com.mapbox.maps:android:10.12.2'
     implementation "com.mapbox.navigation:android:2.10.1"
     implementation "com.mapbox.navigation:ui-dropin:2.10.1"
+    implementation "com.google.android.gms:play-services-location:20.0.0"
 
     // Lifecycle
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.21"

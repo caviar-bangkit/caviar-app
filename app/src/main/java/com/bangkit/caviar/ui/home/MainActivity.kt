@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import com.bangkit.caviar.Location
 import com.bangkit.caviar.NetworkConfig
 import com.bangkit.caviar.R
@@ -35,26 +37,40 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
-
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                AlertDialog.Builder(this@MainActivity)
+                    .setMessage(R.string.exit_hint)
+                    .setPositiveButton("Ya") { _, _ ->
+                        signOut()
+                    }
+                    .setNegativeButton("Tidak") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 //        getNearestTrafficLight()
 
     }
 
 
-    fun getNearestTrafficLight(lat:Double, long:Double, radius:Double){
-        NetworkConfig().getService().getNearestCrossing(lat,long,radius).enqueue(
+    fun getNearestTrafficLight(lat: Double, long: Double, radius: Double) {
+        NetworkConfig().getService().getNearestCrossing(lat, long, radius).enqueue(
             object : Callback<NearbyTrafficLightResponse> {
                 override fun onResponse(
                     call: Call<NearbyTrafficLightResponse>,
                     response: Response<NearbyTrafficLightResponse>
                 ) {
                     if (response.isSuccessful) {
-                        val data:NearbyTrafficLightResponse? = response.body()
+                        val data: NearbyTrafficLightResponse? = response.body()
                         if (data != null) {
 
                         }
                     }
                 }
+
                 override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
                     Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
                 }

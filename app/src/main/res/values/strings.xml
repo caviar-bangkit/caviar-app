@@ -6,4 +6,5 @@
     <string name="content_login_2">Silahkan masuk melalui tombol dibawah ini</string>
     <string name="sign_out">Sign Out</string>
     <string name="tombol_logout">tombol_logout</string>
+    <string name="exit_hint">Apakah Anda yakin ingin keluar dari aplikasi?</string>
 </resources>

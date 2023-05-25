@@ -16,10 +16,12 @@
 
 package com.bangkit.caviar.ui.detection
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bangkit.caviar.databinding.ActivityDetectionBinding
+import com.bangkit.caviar.ui.home.MainActivity
 
 
 /**
@@ -36,6 +38,8 @@ class DetectionActivity : AppCompatActivity() {
         setContentView(activityMainBinding.root)
         supportActionBar?.hide()
         activityMainBinding.closeButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
             finish()
         }
     }

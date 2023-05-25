@@ -80,11 +80,6 @@ import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.mapbox.maps.logE
-import com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi
-import com.mapbox.navigation.ui.maps.building.model.BuildingError
-import com.mapbox.navigation.ui.maps.building.model.BuildingValue
-import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -98,24 +93,6 @@ class MainActivity : AppCompatActivity() {
     private var percentDistanceTraveledThreshold: Double = 95.0
     private var distanceRemainingThresholdInMeters = 30
     private var arrivalNotificationHasDisplayed = false
-    private lateinit var buildingApi: MapboxBuildingsApi
-    private val buildingView = MapboxBuildingView()
-    private val callback =
-        MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>> { expected ->
-            expected.fold(
-                {
-                    logE(
-                        "ShowBuildingExtrusionsActivity",
-                        "error: ${it.errorMessage}"
-                    )
-                },
-                { value ->
-                    binding.mapView.getMapboxMap().getStyle { style ->
-                        buildingView.highlightBuilding(style, value.buildings)
-                    }
-                }
-            )
-        }
 
     private companion object {
         private const val BUTTON_ANIMATION_DURATION = 1500L
@@ -234,12 +211,16 @@ class MainActivity : AppCompatActivity() {
         ) {
             arrivalNotificationHasDisplayed = true
             showMessageWithTextToSpeech(this, "Kamu telah tiba di lokasi!", textToSpeech)
-            buildingApi.queryBuildingOnFinalDestination(routeProgress, callback)
+            Thread.sleep(1000)
+            showMessageWithTextToSpeech(
+                this,
+                "Apakah kamu ingin melanjutkan ke halaman penyeberangan?",
+                textToSpeech
+            )
             val alertDialog = AlertDialog.Builder(this)
                 .setTitle("Konfirmasi")
                 .setMessage("Apakah kamu ingin melanjutkan ke halaman penyeberangan?")
                 .setPositiveButton("Ya") { dialog, _ ->
-                    // Pindah ke activity lain jika dipilih "Yes"
                     val intent = Intent(this, DetectionActivity::class.java)
                     startActivity(intent)
                     finish()
@@ -530,7 +511,7 @@ class MainActivity : AppCompatActivity() {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
                     this@MainActivity,
-                    R.drawable.mapbox_navigation_puck_icon
+                    R.drawable.navigation
                 )
             )
             enabled = true
@@ -566,7 +547,11 @@ class MainActivity : AppCompatActivity() {
                 mapboxReplayer.playFirstLocation()
                 mapboxReplayer.playbackSpeed(3.0)
             } else {
-                showMessageWithTextToSpeech(this, "Tidak dapat memperoleh lokasi pengguna", textToSpeech)
+                showMessageWithTextToSpeech(
+                    this,
+                    "Tidak dapat memperoleh lokasi pengguna",
+                    textToSpeech
+                )
             }
         }
     }
@@ -632,7 +617,11 @@ class MainActivity : AppCompatActivity() {
                         }
                     )
                 } else {
-                    showMessageWithTextToSpeech(this, "Tidak dapat memperoleh lokasi pengguna", textToSpeech)
+                    showMessageWithTextToSpeech(
+                        this,
+                        "Tidak dapat memperoleh lokasi pengguna",
+                        textToSpeech
+                    )
                 }
             }
     }
@@ -669,7 +658,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mapboxReplayer.finish()
-//        buildingApi.cancel()
         maneuverApi.cancel()
         routeLineApi.cancel()
         routeLineView.cancel()

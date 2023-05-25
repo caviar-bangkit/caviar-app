@@ -232,19 +232,19 @@ class MainActivity : AppCompatActivity() {
             !arrivalNotificationHasDisplayed
         ) {
             arrivalNotificationHasDisplayed = true
-            Toast.makeText(this, "You have arrived!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Kamu telah tiba di lokasi!", Toast.LENGTH_LONG).show()
             buildingApi.queryBuildingOnFinalDestination(routeProgress, callback)
             val alertDialog = AlertDialog.Builder(this)
-                .setTitle("Confirmation")
-                .setMessage("Do you want to proceed to the next activity?")
-                .setPositiveButton("Yes") { dialog, _ ->
+                .setTitle("Konfirmasi")
+                .setMessage("Apakah kamu ingin melanjutkan halaman penyeberangan?")
+                .setPositiveButton("Ya") { dialog, _ ->
                     // Pindah ke activity lain jika dipilih "Yes"
                     val intent = Intent(this, DetectionActivity::class.java)
                     startActivity(intent)
                     finish()
                     dialog.dismiss()
                 }
-                .setNegativeButton("No") { dialog, _ ->
+                .setNegativeButton("Tidak") { dialog, _ ->
                     dialog.dismiss()
                 }
                 .create()

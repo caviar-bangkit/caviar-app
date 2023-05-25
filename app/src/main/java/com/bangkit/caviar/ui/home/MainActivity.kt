@@ -79,6 +79,11 @@ import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.mapbox.maps.logE
+import com.mapbox.navigation.ui.maps.building.api.MapboxBuildingsApi
+import com.mapbox.navigation.ui.maps.building.model.BuildingError
+import com.mapbox.navigation.ui.maps.building.model.BuildingValue
+import com.mapbox.navigation.ui.maps.building.view.MapboxBuildingView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -88,6 +93,28 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
+
+    private var percentDistanceTraveledThreshold: Double = 95.0
+    private var distanceRemainingThresholdInMeters = 30
+    private var arrivalNotificationHasDisplayed = false
+    private lateinit var buildingApi: MapboxBuildingsApi
+    private val buildingView = MapboxBuildingView()
+    private val callback =
+        MapboxNavigationConsumer<Expected<BuildingError, BuildingValue>> { expected ->
+            expected.fold(
+                {
+                    logE(
+                        "ShowBuildingExtrusionsActivity",
+                        "error: ${it.errorMessage}"
+                    )
+                },
+                { value ->
+                    binding.mapView.getMapboxMap().getStyle { style ->
+                        buildingView.highlightBuilding(style, value.buildings)
+                    }
+                }
+            )
+        }
 
     private companion object {
         private const val BUTTON_ANIMATION_DURATION = 1500L
@@ -197,6 +224,33 @@ class MainActivity : AppCompatActivity() {
         binding.tripProgressView.render(
             tripProgressApi.getTripProgress(routeProgress)
         )
+        val totalDistance = routeProgress.distanceTraveled + routeProgress.distanceRemaining
+        val percentDistanceTraveled = (routeProgress.distanceTraveled / totalDistance) * 100
+        if (
+            percentDistanceTraveled >= percentDistanceTraveledThreshold &&
+            routeProgress.distanceRemaining <= distanceRemainingThresholdInMeters &&
+            !arrivalNotificationHasDisplayed
+        ) {
+            arrivalNotificationHasDisplayed = true
+            Toast.makeText(this, "You have arrived!", Toast.LENGTH_LONG).show()
+            buildingApi.queryBuildingOnFinalDestination(routeProgress, callback)
+            val alertDialog = AlertDialog.Builder(this)
+                .setTitle("Confirmation")
+                .setMessage("Do you want to proceed to the next activity?")
+                .setPositiveButton("Yes") { dialog, _ ->
+                    // Pindah ke activity lain jika dipilih "Yes"
+                    val intent = Intent(this, DetectionActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("No") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+
+            alertDialog.show()
+        }
     }
     private val routesObserver = RoutesObserver { routeUpdateResult ->
         if (routeUpdateResult.navigationRoutes.isNotEmpty()) {
@@ -251,6 +305,7 @@ class MainActivity : AppCompatActivity() {
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
     private var destinationValue = Point.fromLngLat(107.1359, -6.8272)
     private lateinit var originValue: Point
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -358,8 +413,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getNearestTrafficLight() {
-        if(!::originValue.isInitialized) {
-           return
+        if (!::originValue.isInitialized) {
+            return
         }
         val radius = 1000.0
         val lat = originValue.latitude()
@@ -376,7 +431,10 @@ class MainActivity : AppCompatActivity() {
                             // Mengupdate nilai destinationValue berdasarkan data yang diterima
                             val nearestTrafficLight = data.data
                             if (nearestTrafficLight != null) {
-                                val destination = Point.fromLngLat(nearestTrafficLight.longitude, nearestTrafficLight.latitude)
+                                val destination = Point.fromLngLat(
+                                    nearestTrafficLight.longitude,
+                                    nearestTrafficLight.latitude
+                                )
                                 destinationValue = destination
                                 findRoute(destination)
                             }
@@ -434,8 +492,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.btnSearchTraffic.setOnClickListener {
-            getNearestTrafficLight()
-
+//            getNearestTrafficLight()
+            val destination = destinationValue
+            findRoute(destination)
         }
 
         binding.btnFabCamera.setOnClickListener {
@@ -465,8 +524,8 @@ class MainActivity : AppCompatActivity() {
         MapboxNavigationApp.setup(
             NavigationOptions.Builder(this)
                 .accessToken(getString(R.string.mapbox_access_token))
-                    //fungsi simulasi navigasi
-//                .locationEngine(replayLocationEngine)
+                //fungsi simulasi navigasi
+                .locationEngine(replayLocationEngine)
                 .build()
         )
         binding.mapView.location.apply {
@@ -506,7 +565,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     )
                 )
-                originValue =Point.fromLngLat(location.longitude, location.latitude)
+                originValue = Point.fromLngLat(location.longitude, location.latitude)
                 mapboxReplayer.playFirstLocation()
                 mapboxReplayer.playbackSpeed(3.0)
             } else {
@@ -616,6 +675,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mapboxReplayer.finish()
+        buildingApi.cancel()
         maneuverApi.cancel()
         routeLineApi.cancel()
         routeLineView.cancel()

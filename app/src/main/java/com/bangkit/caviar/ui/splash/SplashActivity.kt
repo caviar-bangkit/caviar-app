@@ -1,5 +1,6 @@
 package com.bangkit.caviar.ui.splash
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.os.Looper
 import com.bangkit.caviar.R
 import com.bangkit.caviar.ui.login.LoginActivity
 
+@SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
     private val SPLASH_DELAY_MS = 2000L

@@ -15,6 +15,7 @@ import com.bangkit.caviar.model.NearbyTrafficLightResponse
 import com.bangkit.caviar.ui.login.LoginActivity
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.speech.tts.TextToSpeech
 import android.view.View
@@ -232,7 +233,7 @@ class MainActivity : AppCompatActivity() {
             !arrivalNotificationHasDisplayed
         ) {
             arrivalNotificationHasDisplayed = true
-            Toast.makeText(this, "Kamu telah tiba di lokasi!", Toast.LENGTH_LONG).show()
+            showMessageWithTextToSpeech(this, "Kamu telah tiba di lokasi!", textToSpeech)
             buildingApi.queryBuildingOnFinalDestination(routeProgress, callback)
             val alertDialog = AlertDialog.Builder(this)
                 .setTitle("Konfirmasi")
@@ -481,11 +482,7 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 initNavigation()
             } else {
-                Toast.makeText(
-                    this,
-                    "Izin lokasi ditolak",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showMessageWithTextToSpeech(this, "Izin lokasi ditolak", textToSpeech)
             }
         }
     }
@@ -569,20 +566,15 @@ class MainActivity : AppCompatActivity() {
                 mapboxReplayer.playFirstLocation()
                 mapboxReplayer.playbackSpeed(3.0)
             } else {
-                Toast.makeText(
-                    this,
-                    "Tidak dapat memperoleh lokasi pengguna",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showMessageWithTextToSpeech(this, "Tidak dapat memperoleh lokasi pengguna", textToSpeech)
             }
         }
     }
 
 
     private fun findRoute(destination: Point) {
-        val message = "Mohon Tunggu"
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+
+        showMessageWithTextToSpeech(this, "Mohon Tunggu", textToSpeech)
 
         if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
@@ -640,17 +632,14 @@ class MainActivity : AppCompatActivity() {
                         }
                     )
                 } else {
-                    val message = "Tidak dapat memperoleh lokasi pengguna"
-                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-                    textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+                    showMessageWithTextToSpeech(this, "Tidak dapat memperoleh lokasi pengguna", textToSpeech)
                 }
             }
     }
 
     private fun setRouteAndStartNavigation(routes: List<NavigationRoute>) {
-        val message = "Lokasi ditemukan"
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+
+        showMessageWithTextToSpeech(this, "Lokasi ditemukan!", textToSpeech)
 
         mapboxNavigation.setNavigationRoutes(routes)
         binding.soundButton.visibility = View.VISIBLE
@@ -672,10 +661,15 @@ class MainActivity : AppCompatActivity() {
         binding.btnFabCamera.visibility = View.VISIBLE
     }
 
+    fun showMessageWithTextToSpeech(context: Context, message: String, textToSpeech: TextToSpeech) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         mapboxReplayer.finish()
-        buildingApi.cancel()
+//        buildingApi.cancel()
         maneuverApi.cancel()
         routeLineApi.cancel()
         routeLineView.cancel()

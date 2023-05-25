@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity() {
             buildingApi.queryBuildingOnFinalDestination(routeProgress, callback)
             val alertDialog = AlertDialog.Builder(this)
                 .setTitle("Konfirmasi")
-                .setMessage("Apakah kamu ingin melanjutkan halaman penyeberangan?")
+                .setMessage("Apakah kamu ingin melanjutkan ke halaman penyeberangan?")
                 .setPositiveButton("Ya") { dialog, _ ->
                     // Pindah ke activity lain jika dipilih "Yes"
                     val intent = Intent(this, DetectionActivity::class.java)
@@ -525,7 +525,7 @@ class MainActivity : AppCompatActivity() {
             NavigationOptions.Builder(this)
                 .accessToken(getString(R.string.mapbox_access_token))
                 //fungsi simulasi navigasi
-                .locationEngine(replayLocationEngine)
+//                .locationEngine(replayLocationEngine)
                 .build()
         )
         binding.mapView.location.apply {

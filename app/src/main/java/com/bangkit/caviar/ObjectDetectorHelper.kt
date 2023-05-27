@@ -82,12 +82,7 @@ class ObjectDetectorHelper(
 
         optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
 
-        val modelName =
-            when (currentModel) {
-                MODEL_DETEKSI_LAMPU_1 -> "detect_quant.tflite"
-                MODEL_DETEKSI_LAMPU_2 -> "modeldua.tflite"
-                else -> "detect_quant.tflite"
-            }
+        val modelName="model.tflite"
 
         try {
             objectDetector =
@@ -145,8 +140,6 @@ class ObjectDetectorHelper(
         const val DELEGATE_NNAPI = 2
 
 
-        const val MODEL_DETEKSI_LAMPU_1 = 0
-        const val MODEL_DETEKSI_LAMPU_2 = 1
 
 
     }

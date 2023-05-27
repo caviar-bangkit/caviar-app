@@ -138,7 +138,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         objectDetectorHelper.maxResults = 5
         objectDetectorHelper.numThreads = 3
         objectDetectorHelper.currentDelegate = ObjectDetectorHelper.DELEGATE_CPU
-        objectDetectorHelper.currentModel = ObjectDetectorHelper.MODEL_DETEKSI_LAMPU_2
         updateControlsUi()
     }
 

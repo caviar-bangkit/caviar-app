@@ -19,6 +19,7 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -38,11 +39,13 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.bangkit.caviar.R
 import com.bangkit.caviar.databinding.FragmentCameraBinding
+import com.bangkit.caviar.detector.TrafficLightDetector
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import org.tensorflow.lite.examples.objectdetection.ObjectDetectorHelper
 import org.tensorflow.lite.task.vision.detector.Detection
+import java.util.Locale
 
 class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
@@ -63,6 +66,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
 
+    private lateinit var textToSpeech: TextToSpeech
+    private lateinit var trafficLightDetector: TrafficLightDetector
+
     override fun onResume() {
         super.onResume()
         // Make sure that all permissions are still present, since the
@@ -73,12 +79,18 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         }
     }
 
+
     override fun onDestroyView() {
         _fragmentCameraBinding = null
         super.onDestroyView()
 
         // Shut down our background executor
         cameraExecutor.shutdown()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     override fun onCreateView(
@@ -95,6 +107,12 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        textToSpeech = TextToSpeech(requireContext()) { status ->
+            if (status != TextToSpeech.ERROR) {
+                textToSpeech.language = Locale.getDefault()
+            }
+        }
+        trafficLightDetector = TrafficLightDetector(requireContext(),textToSpeech)
         objectDetectorHelper = ObjectDetectorHelper(
             context = requireContext(),
             objectDetectorListener = this)
@@ -113,6 +131,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         // Attach listeners to UI control widgets
         initObjectDetection()
     }
+
 
     private fun initObjectDetection() {
         objectDetectorHelper.threshold = 0.5f
@@ -237,6 +256,15 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 imageWidth
             )
 
+            if(results!=null){
+                for (result in results) {
+                    val acc = result.categories[0].score
+                    if(acc > 0.9){
+                        trafficLightDetector.updateState(result.categories[0].label)
+                    }
+
+                }
+            }
             // Force a redraw
             fragmentCameraBinding.overlay.invalidate()
         }
@@ -246,5 +274,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    fun handleBackPressed() {
+        requireActivity().finish()
     }
 }

@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
     private lateinit var textToSpeech: TextToSpeech
 
-    private lateinit var maneuverApi: MapboxManeuverApi
+    private lateinit var maneuverApi : MapboxManeuverApi
     private lateinit var tripProgressApi: MapboxTripProgressApi
     private lateinit var routeLineApi: MapboxRouteLineApi
     private lateinit var routeLineView: MapboxRouteLineView
@@ -398,10 +398,19 @@ class MainActivity : AppCompatActivity() {
         if (!::originValue.isInitialized) {
             return
         }
+        auth = Firebase.auth
+        val firebaseUser = auth.currentUser
+        if (firebaseUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+        val token = firebaseUser.getIdToken(true).result?.token
+
         val radius = 1000.0
         val lat = originValue.latitude()
         val long = originValue.longitude()
-        NetworkConfig().getService().getNearestCrossing(lat, long, radius).enqueue(
+        NetworkConfig(token).getService().getNearestCrossing(lat, long, radius).enqueue(
             object : Callback<NearbyTrafficLightResponse> {
                 override fun onResponse(
                     call: Call<NearbyTrafficLightResponse>,
@@ -470,9 +479,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.btnSearchTraffic.setOnClickListener {
-//            getNearestTrafficLight()
-            val destination = destinationValue
-            findRoute(destination)
+            getNearestTrafficLight()
+
         }
 
         binding.btnFabCamera.setOnClickListener {
@@ -658,10 +666,16 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mapboxReplayer.finish()
-        maneuverApi.cancel()
-        routeLineApi.cancel()
-        routeLineView.cancel()
-        speechApi.cancel()
-        voiceInstructionsPlayer.shutdown()
+        if (::maneuverApi.isInitialized)
+            maneuverApi.cancel()
+
+        if (::routeLineApi.isInitialized)
+            routeLineApi.cancel()
+        if (::routeLineView.isInitialized)
+            routeLineView.cancel()
+        if(::speechApi.isInitialized)
+            speechApi.cancel()
+        if(::voiceInstructionsPlayer.isInitialized)
+            voiceInstructionsPlayer.shutdown()
     }
 }

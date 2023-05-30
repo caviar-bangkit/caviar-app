@@ -1,18 +1,25 @@
 package com.bangkit.caviar
 
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class NetworkConfig {
+class NetworkConfig(token : String? = null) {
     // set interceptor
-    private  val url = "http://192.168.1.15:3000/api/"
+    private  val url = "https://caviar-api-qyyuck654a-et.a.run.app/api/"
     private fun getInterceptor() : OkHttpClient {
         val logging = HttpLoggingInterceptor()
         logging.level = HttpLoggingInterceptor.Level.BODY
+
         val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(logging)
+            .addInterceptor(Interceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $this.token")
+                    .build()
+                chain.proceed(request)
+            })
             .build()
         return  okHttpClient
     }

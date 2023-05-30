@@ -18,6 +18,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -405,39 +406,43 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
-        val token = firebaseUser.getIdToken(true).result?.token
-
-        val radius = 1000.0
-        val lat = originValue.latitude()
-        val long = originValue.longitude()
-        NetworkConfig(token).getService().getNearestCrossing(lat, long, radius).enqueue(
-            object : Callback<NearbyTrafficLightResponse> {
-                override fun onResponse(
-                    call: Call<NearbyTrafficLightResponse>,
-                    response: Response<NearbyTrafficLightResponse>
-                ) {
-                    if (response.isSuccessful) {
-                        val data: NearbyTrafficLightResponse? = response.body()
-                        if (data != null) {
-                            // Mengupdate nilai destinationValue berdasarkan data yang diterima
-                            val nearestTrafficLight = data.data
-                            if (nearestTrafficLight != null) {
-                                val destination = Point.fromLngLat(
-                                    nearestTrafficLight.longitude,
-                                    nearestTrafficLight.latitude
-                                )
-                                destinationValue = destination
-                                findRoute(destination)
+        firebaseUser.getIdToken(true).addOnSuccessListener { result ->
+            Log.d("MainActivity", "getNearestTrafficLight: ${result.token}")
+            val token = result.token
+            val radius = 1000.0
+            val lat = originValue.latitude()
+            val long = originValue.longitude()
+            NetworkConfig(token).getService().getNearestCrossing(lat, long, radius).enqueue(
+                object : Callback<NearbyTrafficLightResponse> {
+                    override fun onResponse(
+                        call: Call<NearbyTrafficLightResponse>,
+                        response: Response<NearbyTrafficLightResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            val data: NearbyTrafficLightResponse? = response.body()
+                            if (data != null) {
+                                // Mengupdate nilai destinationValue berdasarkan data yang diterima
+                                val nearestTrafficLight = data.data
+                                if (nearestTrafficLight != null) {
+                                    val destination = Point.fromLngLat(
+                                        nearestTrafficLight.longitude,
+                                        nearestTrafficLight.latitude
+                                    )
+                                    destinationValue = destination
+                                    findRoute(destination)
+                                }
                             }
                         }
                     }
-                }
 
-                override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
-                    Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
+                    override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
+                        Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
-        )
+            )
+        }
+
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

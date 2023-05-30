@@ -134,8 +134,8 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
 
     private fun initObjectDetection() {
-        objectDetectorHelper.threshold = 0.5f
-        objectDetectorHelper.maxResults = 5
+        objectDetectorHelper.threshold = 0.75f
+        objectDetectorHelper.maxResults = 3
         objectDetectorHelper.numThreads = 3
         objectDetectorHelper.currentDelegate = ObjectDetectorHelper.DELEGATE_CPU
         updateControlsUi()
@@ -258,8 +258,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             if(results!=null){
                 for (result in results) {
                     val acc = result.categories[0].score
-                    if(acc > 0.9){
-                        trafficLightDetector.updateState(result.categories[0].label)
+                    val label = result.categories[0].label
+                    if(acc > 0.92) {
+                        trafficLightDetector.updateState(label)
                     }
 
                 }

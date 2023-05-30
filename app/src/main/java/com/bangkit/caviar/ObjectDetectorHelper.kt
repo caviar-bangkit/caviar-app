@@ -28,11 +28,10 @@ import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
 
 class ObjectDetectorHelper(
-  var threshold: Float = 0.5f,
+  var threshold: Float = 0.75f,
   var numThreads: Int = 2,
   var maxResults: Int = 3,
   var currentDelegate: Int = 0,
-  var currentModel: Int = 0,
   val context: Context,
   val objectDetectorListener: DetectorListener?
 ) {
@@ -138,9 +137,6 @@ class ObjectDetectorHelper(
         const val DELEGATE_CPU = 0
         const val DELEGATE_GPU = 1
         const val DELEGATE_NNAPI = 2
-
-
-
 
     }
 }

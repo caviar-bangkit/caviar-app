@@ -20,6 +20,7 @@ import android.content.pm.PackageManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bangkit.caviar.ui.detection.DetectionActivity
@@ -81,6 +82,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -212,12 +214,16 @@ class MainActivity : AppCompatActivity() {
         ) {
             arrivalNotificationHasDisplayed = true
             showMessageWithTextToSpeech(this, "Kamu telah tiba di lokasi!", textToSpeech)
-            Thread.sleep(1000)
-            showMessageWithTextToSpeech(
-                this,
-                "Apakah kamu ingin melanjutkan ke halaman penyeberangan?",
-                textToSpeech
-            )
+            GlobalScope.launch {
+                delay(1000)
+                withContext(Dispatchers.Main) {
+                    showMessageWithTextToSpeech(
+                        this@MainActivity,
+                        "Apakah kamu ingin melanjutkan ke halaman penyeberangan?",
+                        textToSpeech
+                    )
+                }
+            }
             val alertDialog = AlertDialog.Builder(this)
                 .setTitle("Konfirmasi")
                 .setMessage("Apakah kamu ingin melanjutkan ke halaman penyeberangan?")
@@ -406,43 +412,47 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
-        firebaseUser.getIdToken(true).addOnSuccessListener { result ->
-            Log.d("MainActivity", "getNearestTrafficLight: ${result.token}")
-            val token = result.token
-            val radius = 1000.0
-            val lat = originValue.latitude()
-            val long = originValue.longitude()
-            NetworkConfig(token).getService().getNearestCrossing(lat, long, radius).enqueue(
-                object : Callback<NearbyTrafficLightResponse> {
-                    override fun onResponse(
-                        call: Call<NearbyTrafficLightResponse>,
-                        response: Response<NearbyTrafficLightResponse>
-                    ) {
-                        if (response.isSuccessful) {
-                            val data: NearbyTrafficLightResponse? = response.body()
-                            if (data != null) {
-                                // Mengupdate nilai destinationValue berdasarkan data yang diterima
-                                val nearestTrafficLight = data.data
-                                if (nearestTrafficLight != null) {
-                                    val destination = Point.fromLngLat(
-                                        nearestTrafficLight.longitude,
-                                        nearestTrafficLight.latitude
-                                    )
-                                    destinationValue = destination
-                                    findRoute(destination)
+
+        firebaseUser.getIdToken(true).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result?.token
+                val radius = 1000.0
+                val lat = originValue.latitude()
+                val long = originValue.longitude()
+                NetworkConfig(token).getService().getNearestCrossing(lat, long, radius).enqueue(
+                    object : Callback<NearbyTrafficLightResponse> {
+                        override fun onResponse(
+                            call: Call<NearbyTrafficLightResponse>,
+                            response: Response<NearbyTrafficLightResponse>
+                        ) {
+                            if (response.isSuccessful) {
+                                val data: NearbyTrafficLightResponse? = response.body()
+                                if (data != null) {
+                                    // Mengupdate nilai destinationValue berdasarkan data yang diterima
+                                    val nearestTrafficLight = data.data
+                                    if (nearestTrafficLight != null) {
+                                        val destination = Point.fromLngLat(
+                                            nearestTrafficLight.longitude,
+                                            nearestTrafficLight.latitude
+                                        )
+                                        destinationValue = destination
+                                        findRoute(destination)
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
-                        Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
+                        override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
+                            Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                // Handle kesalahan jika gagal mendapatkan token
+                val exception = task.exception
+                Toast.makeText(this@MainActivity, exception?.message, Toast.LENGTH_SHORT).show()
+            }
         }
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

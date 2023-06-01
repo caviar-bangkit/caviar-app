@@ -402,6 +402,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getNearestTrafficLight() {
+
+        binding.btnSearchTraffic.isEnabled = false
         if (!::originValue.isInitialized) {
             return
         }
@@ -415,11 +417,11 @@ class MainActivity : AppCompatActivity() {
 
         firebaseUser.getIdToken(true).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val token = task.result?.token
+                val token = "Bearer "+task.result?.token
                 val radius = 1000.0
                 val lat = originValue.latitude()
                 val long = originValue.longitude()
-                NetworkConfig(token).getService().getNearestCrossing(lat, long, radius).enqueue(
+                NetworkConfig(token).getService().getNearestCrossing(lat, long, radius,token).enqueue(
                     object : Callback<NearbyTrafficLightResponse> {
                         override fun onResponse(
                             call: Call<NearbyTrafficLightResponse>,
@@ -439,11 +441,15 @@ class MainActivity : AppCompatActivity() {
                                         findRoute(destination)
                                     }
                                 }
+                            }else{
+                                binding.btnSearchTraffic.isEnabled = true
                             }
+
                         }
 
                         override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
                             Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
+                            binding.btnSearchTraffic.isEnabled = true
                         }
                     }
                 )
@@ -636,15 +642,18 @@ class MainActivity : AppCompatActivity() {
                             ) {
 
                                 setRouteAndStartNavigation(routes)
+                                binding.btnSearchTraffic.isEnabled = true
                             }
                         }
                     )
+
                 } else {
                     showMessageWithTextToSpeech(
                         this,
                         "Tidak dapat memperoleh lokasi pengguna",
                         textToSpeech
                     )
+                    binding.btnSearchTraffic.isEnabled = true
                 }
             }
     }

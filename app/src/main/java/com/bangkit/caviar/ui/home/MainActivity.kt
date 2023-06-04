@@ -82,6 +82,7 @@ import com.mapbox.navigation.ui.voice.model.SpeechVolume
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -610,6 +611,7 @@ class MainActivity : AppCompatActivity() {
                         RouteOptions.builder()
                             .applyDefaultNavigationOptions()
                             .applyLanguageAndVoiceUnitOptions(this)
+                            .profile(DirectionsCriteria.PROFILE_WALKING)
                             .coordinatesList(listOf(originPoint, destination))
                             .bearingsList(
                                 listOf(

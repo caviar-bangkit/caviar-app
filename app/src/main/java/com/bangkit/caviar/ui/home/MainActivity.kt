@@ -1,13 +1,21 @@
 package com.bangkit.caviar.ui.home
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.bangkit.caviar.NetworkConfig
 import com.bangkit.caviar.R
 import com.bangkit.caviar.databinding.ActivityMainBinding
@@ -29,7 +37,15 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bangkit.caviar.dialog.DialogResult
 import com.bangkit.caviar.ui.detection.DetectionActivity
+import com.bangkit.caviar.ui.login.LoginActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.location.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.Bearing
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.bindgen.Expected
@@ -83,20 +99,18 @@ import com.mapbox.navigation.ui.voice.model.SpeechAnnouncement
 import com.mapbox.navigation.ui.voice.model.SpeechError
 import com.mapbox.navigation.ui.voice.model.SpeechValue
 import com.mapbox.navigation.ui.voice.model.SpeechVolume
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     private var percentDistanceTraveledThreshold: Double = 97.0
     private var distanceRemainingThresholdInMeters = 30
@@ -307,6 +321,13 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.title = "Home"
 
         auth = Firebase.auth
+        val gso = GoogleSignInOptions
+            .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val dialogResult:DialogResult = DialogResult(this@MainActivity)
@@ -532,6 +553,7 @@ class MainActivity : AppCompatActivity() {
         dialogResult.setMessage("Apakah anda yakin ingin logout?")
         dialogResult.setPositiveButton("Ya", onClickListener = {
             auth.signOut()
+            googleSignInClient.signOut()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         })
@@ -540,6 +562,7 @@ class MainActivity : AppCompatActivity() {
         })
         dialogResult.show()
 
+        
     }
 
     override fun onRequestPermissionsResult(

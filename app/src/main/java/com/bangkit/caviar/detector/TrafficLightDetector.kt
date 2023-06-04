@@ -70,14 +70,15 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
 
 //        looping
         for (obj in objectList){
+
             val state:TrafficLightState = toState(obj.categories[0].label)
             val score = obj.categories[0].score
 //            check is crosswalk and score 0.93
-            if (state == TrafficLightState.CROSSWALK && score > 0.85){
+            if (state == TrafficLightState.CROSSWALK && score > 0.9){
                 measuereCrossWalk = true
-            }
-            if(score > 0.83){
+            }else  if(score > 0.9 && state != TrafficLightState.CROSSWALK){
                 updateState(state)
+                break
             }
         }
 
@@ -94,11 +95,6 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
     }
 
 
-
-    fun stopHandler() {
-        handler.removeCallbacks(runnable)
-    }
-
     fun runHandler() {
         handler.postDelayed(runnable, delayedTime.toLong())
     }
@@ -113,8 +109,8 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
 
     private fun showMessageWithTextToSpeech(message: String, vibrator : Boolean = false) {
 //        wait until text to speech finish
-        while (textToSpeech.isSpeaking){
-            Thread.sleep(100)
+        if(textToSpeech.isSpeaking){
+            textToSpeech.stop()
         }
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)

@@ -87,13 +87,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
 
-    private var percentDistanceTraveledThreshold: Double = 95.0
+    private var percentDistanceTraveledThreshold: Double = 97.0
     private var distanceRemainingThresholdInMeters = 30
     private var arrivalNotificationHasDisplayed = false
 

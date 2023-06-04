@@ -314,7 +314,8 @@ class MainActivity : AppCompatActivity() {
                 AlertDialog.Builder(this@MainActivity)
                     .setMessage(R.string.exit_hint)
                     .setPositiveButton("Ya") { _, _ ->
-                        signOut()
+//                        closeApp()
+                        finish()
                     }
                     .setNegativeButton("Tidak") { dialog, _ ->
                         dialog.dismiss()

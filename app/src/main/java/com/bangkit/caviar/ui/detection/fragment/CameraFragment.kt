@@ -255,15 +255,8 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 imageWidth
             )
 
-            if(results!=null){
-                for (result in results) {
-                    val acc = result.categories[0].score
-                    val label = result.categories[0].label
-                    if(acc > 0.92) {
-                        trafficLightDetector.updateState(label)
-                    }
-
-                }
+            if (results != null) {
+                trafficLightDetector.updateObjectDetected(results)
             }
             // Force a redraw
             fragmentCameraBinding.overlay.invalidate()

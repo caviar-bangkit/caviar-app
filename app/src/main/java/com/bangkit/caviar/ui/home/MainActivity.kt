@@ -15,12 +15,19 @@ import com.bangkit.caviar.model.NearbyTrafficLightResponse
 import com.bangkit.caviar.ui.login.LoginActivity
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.Activity.*
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.view.View
+import android.view.View.OnClickListener
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bangkit.caviar.dialog.DialogResult
 import com.bangkit.caviar.ui.detection.DetectionActivity
 import com.google.android.gms.location.*
 import com.mapbox.api.directions.v5.models.Bearing
@@ -302,16 +309,17 @@ class MainActivity : AppCompatActivity() {
         auth = Firebase.auth
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                AlertDialog.Builder(this@MainActivity)
-                    .setMessage(R.string.exit_hint)
-                    .setPositiveButton("Ya") { _, _ ->
-//                        closeApp()
-                        finish()
-                    }
-                    .setNegativeButton("Tidak") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show()
+                val dialogResult:DialogResult = DialogResult(this@MainActivity)
+                dialogResult.setTitle("Keluar Aplikasi")
+                dialogResult.setImage(R.drawable.exit)
+                dialogResult.setMessage("Apakah anda yakin ingin keluar aplikasi?")
+                dialogResult.setPositiveButton("Ya", onClickListener = {
+                    finish()
+                })
+                dialogResult.setNegativeButton("Tidak", onClickListener = {
+                    dialogResult.dismiss()
+                })
+                dialogResult.show()
             }
         }
         onBackPressedDispatcher.addCallback(this, callback)
@@ -393,6 +401,53 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    val GPS_REQUEST_CODE = 1001
+    private fun gpsDisabledDialog() {
+        val dialogResult = DialogResult(this)
+        dialogResult.setTitle("GPS tidak aktif")
+        dialogResult.setMessage("Pastikan GPS anda aktif dan coba lagi")
+        dialogResult.setImage(R.drawable.map)
+        dialogResult.setPositiveButton("Aktifkan", onClickListener = {
+            startActivityForResult(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),GPS_REQUEST_CODE)
+            dialogResult.dismiss()
+        })
+        dialogResult.setNegativeButton("Tutup", onClickListener = {
+            finish()
+        })
+        dialogResult.show()
+    }
+
+    private fun noConnectionDialog() {
+        val dialogResult = DialogResult(this)
+        dialogResult.setTitle("Tidak ada koneksi")
+        dialogResult.setMessage("Pastikan anda terhubung dengan internet dan coba lagi")
+        dialogResult.setImage(R.drawable.error_connection)
+        dialogResult.setNegativeButton("Tutup", onClickListener = {
+            dialogResult.dismiss()
+        })
+        dialogResult.show()
+    }
+
+    private fun serverErrorDialog(){
+        val dialogResult = DialogResult(this)
+        dialogResult.setTitle("Server Error")
+        dialogResult.setMessage("Terjadi kesalahan pada server, silahkan coba lagi")
+        dialogResult.setImage(R.drawable.error_connection)
+        dialogResult.setNegativeButton("Tutup", onClickListener = {
+            dialogResult.dismiss()
+        })
+        dialogResult.show()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode==GPS_REQUEST_CODE){
+            Handler(Looper.getMainLooper()).postDelayed({
+                initNavigation()
+            }, 2000)
+        }
+    }
+
     fun getNearestTrafficLight() {
 
         binding.btnSearchTraffic.isEnabled = false
@@ -434,21 +489,22 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 }
                             }else{
+                                serverErrorDialog()
                                 binding.btnSearchTraffic.isEnabled = true
                             }
 
                         }
 
                         override fun onFailure(call: Call<NearbyTrafficLightResponse>, t: Throwable) {
-                            Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT).show()
+                            noConnectionDialog()
                             binding.btnSearchTraffic.isEnabled = true
                         }
                     }
                 )
             } else {
                 // Handle kesalahan jika gagal mendapatkan token
-                val exception = task.exception
-                Toast.makeText(this@MainActivity, exception?.message, Toast.LENGTH_SHORT).show()
+                noConnectionDialog()
+                binding.btnSearchTraffic.isEnabled = true
             }
         }
     }
@@ -470,9 +526,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun signOut() {
-        auth.signOut()
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
+        val dialogResult:DialogResult = DialogResult(this@MainActivity)
+        dialogResult.setTitle("Logout")
+        dialogResult.setImage(R.drawable.logout)
+        dialogResult.setMessage("Apakah anda yakin ingin logout?")
+        dialogResult.setPositiveButton("Ya", onClickListener = {
+            auth.signOut()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        })
+        dialogResult.setNegativeButton("Tidak", onClickListener = {
+            dialogResult.dismiss()
+        })
+        dialogResult.show()
+
     }
 
     override fun onRequestPermissionsResult(
@@ -566,6 +633,7 @@ class MainActivity : AppCompatActivity() {
                 mapboxReplayer.playFirstLocation()
                 mapboxReplayer.playbackSpeed(3.0)
             } else {
+                gpsDisabledDialog()
                 showMessageWithTextToSpeech(
                     this,
                     "Tidak dapat memperoleh lokasi pengguna",
@@ -639,6 +707,7 @@ class MainActivity : AppCompatActivity() {
                     )
 
                 } else {
+                    gpsDisabledDialog()
                     showMessageWithTextToSpeech(
                         this,
                         "Tidak dapat memperoleh lokasi pengguna",

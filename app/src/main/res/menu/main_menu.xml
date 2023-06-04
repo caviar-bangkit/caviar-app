@@ -5,6 +5,7 @@
         android:id="@+id/sign_out_menu"
         android:title="@string/sign_out"
         app:showAsAction="always"
+        app:iconTint="@color/white"
         android:icon="@drawable/ic_logout"
         android:contentDescription="@string/tombol_logout"/>
 </menu>

@@ -18,9 +18,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import android.view.View
-import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bangkit.caviar.ui.detection.DetectionActivity
@@ -50,7 +48,6 @@ import com.mapbox.navigation.core.lifecycle.MapboxNavigationApp
 import com.mapbox.navigation.core.lifecycle.MapboxNavigationObserver
 import com.mapbox.navigation.core.lifecycle.requireMapboxNavigation
 import com.mapbox.navigation.core.replay.MapboxReplayer
-import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationMatcherResult
@@ -88,8 +85,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 
 class MainActivity : AppCompatActivity() {
 
@@ -105,7 +100,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val mapboxReplayer = MapboxReplayer()
-    private val replayLocationEngine = ReplayLocationEngine(mapboxReplayer)
     private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
     private lateinit var navigationCamera: NavigationCamera
     private lateinit var viewportDataSource: MapboxNavigationViewportDataSource
@@ -306,12 +300,6 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.title = "Home"
 
         auth = Firebase.auth
-        val firebaseUser = auth.currentUser
-        if (firebaseUser == null) {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            return
-        }
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 AlertDialog.Builder(this@MainActivity)
@@ -535,8 +523,6 @@ class MainActivity : AppCompatActivity() {
         MapboxNavigationApp.setup(
             NavigationOptions.Builder(this)
                 .accessToken(getString(R.string.mapbox_access_token))
-                //fungsi simulasi navigasi
-//                .locationEngine(replayLocationEngine)
                 .build()
         )
         binding.mapView.location.apply {

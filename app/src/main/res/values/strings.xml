@@ -9,4 +9,5 @@
     <string name="exit_hint">Apakah Anda yakin ingin keluar dari aplikasi?</string>
     <string name="content_description_camera">Tombol Deteksi Kamera</string>
     <string name="content_description_traffic">Tombol Navigasi ke lalu lintas terdekat</string>
+    <string name="sign_in">Login</string>
 </resources>

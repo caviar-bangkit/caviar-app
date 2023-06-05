@@ -1,7 +1,6 @@
 package com.bangkit.caviar.ui.login
 
 import android.app.Activity
-import android.content.ContentValues.TAG
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

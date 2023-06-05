@@ -19,12 +19,13 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.Toast
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
@@ -103,7 +104,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         return fragmentCameraBinding.root
     }
 
-    @SuppressLint("MissingPermission")
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -113,6 +114,31 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             }
         }
         trafficLightDetector = TrafficLightDetector(requireContext(),textToSpeech)
+        trafficLightDetector.setOnCrossWalkDetectedListener(object :TrafficLightDetector.TrafficLightDetectorCallback{
+            override fun onCrossWalkDetected() {
+               fragmentCameraBinding.redetect.visibility = View.VISIBLE
+                trafficLightDetector.searchCrossWalk()
+            }
+            override fun onTrafficLightStateChange(state: TrafficLightDetector.TrafficLightState) {
+                when(state){
+                    TrafficLightDetector.TrafficLightState.RED -> {
+                        fragmentCameraBinding.statusText.text ="Silahkan menyebrang"
+                    }
+                    TrafficLightDetector.TrafficLightState.GREEN -> {
+                        fragmentCameraBinding.statusText.text ="Silahkan menunggu"
+                    }
+                    TrafficLightDetector.TrafficLightState.YELLOW -> {
+                        fragmentCameraBinding.statusText.text ="Silahkan bersiap-siap"
+                    }
+                    TrafficLightDetector.TrafficLightState.CROSSWALK -> {
+                        fragmentCameraBinding.statusText.text ="Arahkan kamera ke lampu lalu lintas"
+                    }
+                    else -> {
+                        fragmentCameraBinding.statusText.text ="Arahkan kamera ke zebra cross"
+                    }
+                }
+            }
+        })
         objectDetectorHelper = ObjectDetectorHelper(
             context = requireContext(),
             objectDetectorListener = this)
@@ -130,6 +156,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         fragmentCameraBinding
         // Attach listeners to UI control widgets
         initObjectDetection()
+        setupUI()
     }
 
 
@@ -249,17 +276,18 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         activity?.runOnUiThread {
 
             // Pass necessary information to OverlayView for drawing on the canvas
-            fragmentCameraBinding.overlay.setResults(
-                results ?: LinkedList<Detection>(),
-                imageHeight,
-                imageWidth
-            )
-
-            if (results != null) {
-                trafficLightDetector.updateObjectDetected(results)
+            if(_fragmentCameraBinding != null){
+                fragmentCameraBinding.overlay.setResults(
+                    results ?: LinkedList<Detection>(),
+                    imageHeight,
+                    imageWidth
+                )
+                if (results != null) {
+                    trafficLightDetector.updateObjectDetected(results)
+                }
+                // Force a redraw
+                fragmentCameraBinding.overlay.invalidate()
             }
-            // Force a redraw
-            fragmentCameraBinding.overlay.invalidate()
         }
     }
 
@@ -269,7 +297,26 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         }
     }
 
+
+    fun setupUI(){
+//        handler 300 ms
+        Handler(Looper.getMainLooper()).postDelayed({
+           trafficLightDetector.searchCrossWalk()
+        }, 300)
+        fragmentCameraBinding.redetect.visibility = View.INVISIBLE
+        fragmentCameraBinding.statusText.text ="Arahkan kamera ke zebra cross"
+        fragmentCameraBinding.closeButton.setOnClickListener {
+            handleBackPressed()
+        }
+        fragmentCameraBinding.redetect.setOnClickListener(View.OnClickListener {
+            trafficLightDetector.resetState()
+            fragmentCameraBinding.redetect.visibility = View.INVISIBLE
+        });
+    }
+
+
+
     fun handleBackPressed() {
-        requireActivity().finish()
+        requireActivity().onBackPressed()
     }
 }

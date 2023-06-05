@@ -18,11 +18,14 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
         private set
     val handler = Handler(Looper.getMainLooper())
     val delayedTime = 3500
+    var trafficLightDetectorCallback: TrafficLightDetectorCallback? = null
     val runnable:Runnable = object :Runnable {
         override fun run() {
             if (measuereCrossWalk){
                 if(!isDetectedCrosswalk){
                     isDetectedCrosswalk = true
+                    trafficLightDetectorCallback?.onCrossWalkDetected()
+                    trafficLightDetectorCallback?.onTrafficLightStateChange(TrafficLightState.CROSSWALK)
                     val message = "Terdeteksi ada penyeberangan jalan, Arahkan kamera agak ke atas untuk melihat lampu lalu lintas."
                     showMessageWithTextToSpeech(message,true)
                 }
@@ -44,6 +47,7 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
             return
         }
         currentState = newState
+        trafficLightDetectorCallback?.onTrafficLightStateChange(currentState)
         if (isDetectedCrosswalk){
             if(currentState == TrafficLightState.RED){
                 val message = "Lampu merah terdeteksi, Silakan lanjutkan menyeberang jalan."
@@ -59,6 +63,8 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
             }
         }
     }
+
+
 
     fun updateObjectDetected(objectList : MutableList<Detection>) {
         measuereCrossWalk = false
@@ -99,10 +105,22 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
         handler.postDelayed(runnable, delayedTime.toLong())
     }
 
+    fun searchCrossWalk(){
+        val message = "Arahkan kamera agak ke bawah untuk mendeteksi penyeberangan jalan."
+        showMessageWithTextToSpeech(message)
+    }
+
 
     fun resetState() {
         isDetectedCrosswalk = false
-        currentState = TrafficLightState.RED
+        measuereCrossWalk = false
+        runHandler()
+        currentState = TrafficLightState.UNKNOWN
+        trafficLightDetectorCallback?.onTrafficLightStateChange(currentState)
+    }
+
+    fun setOnCrossWalkDetectedListener(callback: TrafficLightDetectorCallback) {
+        trafficLightDetectorCallback = callback
     }
 
 
@@ -119,5 +137,10 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
         }
 
     }
-
+    interface TrafficLightDetectorCallback {
+        fun onTrafficLightStateChange(state: TrafficLightDetector.TrafficLightState)
+        fun onCrossWalkDetected()
+    }
 }
+
+// make interface class for callback

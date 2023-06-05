@@ -39,11 +39,7 @@ class DetectionActivity : AppCompatActivity() {
         activityMainBinding = ActivityDetectionBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
         supportActionBar?.hide()
-        activityMainBinding.closeButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
+
     }
 
     override fun onBackPressed() {

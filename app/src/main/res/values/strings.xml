@@ -11,5 +11,6 @@
     <string name="content_description_close_nav">Tutup navigasi</string>
     <string name="content_description_close_cam">Tutup kamera</string>
     <string name="content_description_traffic">Tombol Navigasi ke lalu lintas terdekat</string>
+    <string name="sign_in">Login</string>
     <string name="content_message_redetect_zebracorss">Deteksi Ulang Zebra Cross</string>
 </resources>

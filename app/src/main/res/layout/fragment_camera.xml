@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
             android:text="TextView"
-
+            android:importantForAccessibility="no"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textStyle="bold" />
@@ -35,7 +35,8 @@
         android:layout_marginBottom="16dp"
         android:textAllCaps="false"
         android:textSize="13sp"
-        android:text="Deteksi Ulang Zebra Cross"
+        android:contentDescription="@string/content_message_redetect_zebracorss"
+        android:text="@string/content_message_redetect_zebracorss"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/close_button"
         app:layout_constraintStart_toStartOf="parent" />
@@ -71,7 +72,11 @@
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/close_background"
+        android:contentDescription="@string/content_description_close_cam"
         android:cropToPadding="true"
+        android:focusable="true"
+
+        android:focusableInTouchMode="true"
         android:padding="16dp"
         android:src="@drawable/ic_close"
         app:layout_anchorGravity="bottom|end"

@@ -47,7 +47,7 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
             return
         }
         currentState = newState
-        trafficLightDetectorCallback?.onTrafficLightStateChange(currentState)
+
         if (isDetectedCrosswalk){
             if(currentState == TrafficLightState.RED){
                 val message = "Lampu merah terdeteksi, Silakan lanjutkan menyeberang jalan."
@@ -61,6 +61,7 @@ class TrafficLightDetector(private val context: Context, private val textToSpeec
                     "Lampu lalu lintas kuning, Tunggu sebentar untuk menyeberang jalan."
                 showMessageWithTextToSpeech(message)
             }
+            trafficLightDetectorCallback?.onTrafficLightStateChange(currentState)
         }
     }
 

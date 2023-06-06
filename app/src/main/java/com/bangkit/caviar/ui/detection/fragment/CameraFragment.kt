@@ -16,6 +16,7 @@
 package org.tensorflow.lite.examples.objectdetection.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -26,6 +27,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
@@ -113,7 +116,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 textToSpeech.language = Locale.getDefault()
             }
         }
+
         trafficLightDetector = TrafficLightDetector(requireContext(),textToSpeech)
+        trafficLightDetector.resetState()
         trafficLightDetector.setOnCrossWalkDetectedListener(object :TrafficLightDetector.TrafficLightDetectorCallback{
             override fun onCrossWalkDetected() {
                fragmentCameraBinding.redetect.visibility = View.VISIBLE
@@ -157,10 +162,13 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         // Attach listeners to UI control widgets
         initObjectDetection()
         setupUI()
+        view.clearFocus()
+
     }
 
 
-    private fun initObjectDetection() {
+
+        private fun initObjectDetection() {
         objectDetectorHelper.threshold = 0.75f
         objectDetectorHelper.maxResults = 3
         objectDetectorHelper.numThreads = 3

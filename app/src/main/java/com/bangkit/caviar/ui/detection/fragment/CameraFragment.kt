@@ -18,6 +18,10 @@ package org.tensorflow.lite.examples.objectdetection.fragments
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
+import android.Manifest
+import androidx.core.app.ActivityCompat
+import com.bangkit.caviar.dialog.DialogResult
+import com.bangkit.caviar.ui.home.MainActivity
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
@@ -44,14 +48,19 @@ import androidx.navigation.Navigation
 import com.bangkit.caviar.R
 import com.bangkit.caviar.databinding.FragmentCameraBinding
 import com.bangkit.caviar.detector.TrafficLightDetector
+import com.google.android.gms.location.*
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import org.tensorflow.lite.examples.objectdetection.ObjectDetectorHelper
 import org.tensorflow.lite.task.vision.detector.Detection
 import java.util.Locale
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.os.Build
 
-class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
+class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener, LocationListener {
 
     private val TAG = "ObjectDetection"
 
@@ -72,6 +81,16 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     private lateinit var textToSpeech: TextToSpeech
     private lateinit var trafficLightDetector: TrafficLightDetector
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var previousLocation: Location? = null
+    private var isConfirmationDialogShown = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        checkLocationPermission()
+    }
 
     override fun onResume() {
         super.onResume()
@@ -95,12 +114,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        textToSpeech.stop()
+        textToSpeech.shutdown()
     }
 
     override fun onCreateView(
-      inflater: LayoutInflater,
-      container: ViewGroup?,
-      savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         _fragmentCameraBinding = FragmentCameraBinding.inflate(inflater, container, false)
 
@@ -117,11 +138,13 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             }
         }
 
+        isConfirmationDialogShown = false
+
         trafficLightDetector = TrafficLightDetector(requireContext(),textToSpeech)
         trafficLightDetector.resetState()
         trafficLightDetector.setOnCrossWalkDetectedListener(object :TrafficLightDetector.TrafficLightDetectorCallback{
             override fun onCrossWalkDetected() {
-               fragmentCameraBinding.redetect.visibility = View.VISIBLE
+                fragmentCameraBinding.redetect.visibility = View.VISIBLE
                 trafficLightDetector.searchCrossWalk()
             }
             override fun onTrafficLightStateChange(state: TrafficLightDetector.TrafficLightState) {
@@ -164,11 +187,111 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         setupUI()
         view.clearFocus()
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+    }
+
+    private fun checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Request location permission
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                PERMISSION_REQUEST_CODE
+            )
+        } else {
+            // Permission already granted
+            startLocationUpdates()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdates() {
+        val locationRequest = LocationRequest.create().apply {
+            interval = 1000
+            fastestInterval = 500
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            null
+        )
+    }
+
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            val currentLocation = locationResult.lastLocation
+            // Handle location update and check for movement or crossing here
+            if (currentLocation != null) {
+                checkMovement(currentLocation)
+            }
+        }
+    }
+
+    private fun checkMovement(currentLocation: Location) {
+        if (previousLocation != null) {
+            val distance = currentLocation.distanceTo(previousLocation!!)
+            if (distance >= 3 && !isConfirmationDialogShown) {
+                isConfirmationDialogShown = true
+                showConfirmationDialog()
+            }
+        }
+        previousLocation = currentLocation
+    }
+
+    private fun showConfirmationDialog() {
+        speakText("Apakah Anda sudah selesai menyeberang?")
+
+        val dialog = DialogResult(requireContext())
+        dialog.setTitle("Konfirmasi")
+        dialog.setImage(R.drawable.crossing)
+        dialog.setMessage("Apakah Anda sudah selesai menyeberang?")
+
+        dialog.setPositiveButton("Ya") {
+            // User has finished crossing, proceed to the next activity
+            Toast.makeText(requireContext(), "Kembali ke halaman utama", Toast.LENGTH_SHORT).show()
+            speakText("Kembali ke halaman utama")
+            dialog.dismiss()
+
+            // Pindah ke activity lain di sini
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        dialog.setNegativeButton("Tidak") {
+            // User hasn't finished crossing, do nothing
+            Toast.makeText(requireContext(), "Lanjut Menyeberang", Toast.LENGTH_SHORT).show()
+            speakText("Lanjut Menyeberang")
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun speakText(text: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        } else {
+            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null)
+        }
+    }
+
+    override fun onLocationChanged(location: Location) {
+        checkMovement(location)
+    }
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 123
     }
 
 
 
-        private fun initObjectDetection() {
+    private fun initObjectDetection() {
         objectDetectorHelper.threshold = 0.75f
         objectDetectorHelper.maxResults = 3
         objectDetectorHelper.numThreads = 3
@@ -234,9 +357,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                             // The image rotation and RGB image buffer are initialized only once
                             // the analyzer has started running
                             bitmapBuffer = Bitmap.createBitmap(
-                              image.width,
-                              image.height,
-                              Bitmap.Config.ARGB_8888
+                                image.width,
+                                image.height,
+                                Bitmap.Config.ARGB_8888
                             )
                         }
 
@@ -276,10 +399,10 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     // Update UI after objects have been detected. Extracts original image height/width
     // to scale and place bounding boxes properly through OverlayView
     override fun onResults(
-      results: MutableList<Detection>?,
-      inferenceTime: Long,
-      imageHeight: Int,
-      imageWidth: Int
+        results: MutableList<Detection>?,
+        inferenceTime: Long,
+        imageHeight: Int,
+        imageWidth: Int
     ) {
         activity?.runOnUiThread {
 
@@ -309,7 +432,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     fun setupUI(){
 //        handler 300 ms
         Handler(Looper.getMainLooper()).postDelayed({
-           trafficLightDetector.searchCrossWalk()
+            trafficLightDetector.searchCrossWalk()
         }, 300)
         fragmentCameraBinding.redetect.visibility = View.INVISIBLE
         fragmentCameraBinding.statusText.text ="Arahkan kamera ke zebra cross"

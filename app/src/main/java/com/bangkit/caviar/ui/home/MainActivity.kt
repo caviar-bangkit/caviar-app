@@ -774,5 +774,7 @@ class MainActivity : AppCompatActivity() {
             speechApi.cancel()
         if(::voiceInstructionsPlayer.isInitialized)
             voiceInstructionsPlayer.shutdown()
+        textToSpeech.stop()
+        textToSpeech.shutdown()
     }
 }

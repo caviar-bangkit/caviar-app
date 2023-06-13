@@ -21,6 +21,10 @@ Caviar Apps is creation by C23-PS05 Bangkit Team.
 - Design a user-friendly and easy-to-use interface for visually impaired individuals.
 
 
+## Screenshots
+![Caviar Apps ScreenShot2](https://github.com/caviar-bangkit/caviar-app/assets/77492139/ae54bd11-56e5-4e59-aeef-bf3412beefc8)
+
+
 ## Tech Stack
 
 - Kotlin.
